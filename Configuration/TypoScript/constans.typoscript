@@ -1,0 +1,3 @@
+plugin.tx_w4payrexx {
+    redirectTypeNum = 2278101
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="de" datatype="plaintext" original="messages" date="2022-02-03T16:30:00Z" product-name="cart">
+        <header/>
+        <body>
+            <trans-unit id="tx_cart.mail.buyer.subject_failed">
+                <source>Order confirmation - %s - payment error</source>
+                <target>Bestellbestätigung - %s - Zahlungsfehler</target>
+            </trans-unit>
+            <trans-unit id="tx_cart.mail.seller.subject_failed">
+                <source>Order received - %s - payment error</source>
+                <target>Bestelleingang - %s - Zahlungsfehler</target>
+            </trans-unit>
+            <trans-unit id="tx_cart.mail.payment_failed">
+                <source>Unfortunately there was a problem processing the online payment.</source>
+                <target>Leider gab es ein Problem bei der Verarbeitung der Online-Zahlung.</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
