@@ -1,7 +1,7 @@
 {
     "name": "w4services/w4_payrexx",
     "type": "typo3-cms-extension",
-    "version": "1.0.2",
+    "version": "1.0.1",
     "description": "W4 Payrexx payment gateway for TYPO3",
     "homepage": "https://www.w-4.com",
     "repositories": [

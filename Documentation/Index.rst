@@ -21,7 +21,7 @@ W4 Payrexx
 
 ----
 
-Integrates the Payrexx payment platform into the :guilabel:`cart` extension.
+Integrates the Payrexx payment platform into the `cart` extension.
 
 ----
 
