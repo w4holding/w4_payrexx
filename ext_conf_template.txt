@@ -1,3 +1,6 @@
+# cat=Payrexx settings; type=string; label=Payrexx API url
+payrexx_api_url=https://api.payrexx.com/v1.0/Gateway/?instance=
+
 # cat=Payrexx settings; type=string; label=Payrexx api key
 payrexx_api_secret=
 

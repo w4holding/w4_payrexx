@@ -18,10 +18,8 @@ use TYPO3\CMS\Extbase\Mvc\Request;
 class Payrexx
 {
     /**
-     *
+     * Prefix to referenceId in Gateway
      */
-    const API_URL = 'https://api.onlinezahlen.ch/v1.0/Gateway/?instance=';
-
     const REFERENCE_PREFIX = 'web_';
 
     /**
@@ -124,7 +122,7 @@ class Payrexx
         $formParams = $this->gateway->toArray();
         $formParams['ApiSignature'] = $apiSignature;
 
-        $response = $requestFactory->request(self::API_URL . $this->getApiInstance(), 'POST', ['form_params' => $formParams]);
+        $response = $requestFactory->request($this->getApiUrl() . $this->getApiInstance(), 'POST', ['form_params' => $formParams]);
 
         if ($response->getStatusCode() === 200) $content = $response->getBody()->getContents();
 
@@ -189,6 +187,14 @@ class Payrexx
     private function createApiSignature(): string
     {
         return base64_encode(hash_hmac('sha256', http_build_query($this->gateway->toArray(), null, '&'), $this->getApiSecret(), true));
+    }
+
+    /**
+     * @return string
+     */
+    private function getApiUrl(): string
+    {
+        return $this->extensionConfiguration['payrexx_api_url'];
     }
 
     /**
