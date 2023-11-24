@@ -43,6 +43,11 @@ class Gateway
     private $failedRedirectUrl;
 
     /**
+     * @var string
+     */
+    private $cancelRedirectUrl;
+
+    /**
      * @return int
      */
     public function getAmount(): int
@@ -144,6 +149,22 @@ class Gateway
     public function setFailedRedirectUrl(string $failedRedirectUrl): void
     {
         $this->failedRedirectUrl = $failedRedirectUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCancelRedirectUrl(): string
+    {
+        return $this->cancelRedirectUrl;
+    }
+
+    /**
+     * @param string $cancelRedirectUrl
+     */
+    public function setCancelRedirectUrl(string $cancelRedirectUrl): void
+    {
+        $this->cancelRedirectUrl = $cancelRedirectUrl;
     }
 
     /**
