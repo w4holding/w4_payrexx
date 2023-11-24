@@ -137,6 +137,54 @@ class PaymentController extends ActionController
         }
     }
 
+    public function failedAction(): void
+    {
+        if ($this->request->hasArgument('hash') && !empty($this->request->getArgument('hash'))) {
+            $this->loadCartByHash($this->request->getArgument('hash'), 'FHash');
+
+            if ($this->cart) {
+                $orderItem = $this->cart->getOrderItem();
+                $payment = $orderItem->getPayment();
+
+                $this->restoreCartSession();
+
+                $payment->setStatus('failed');
+
+                $this->paymentRepository->update($payment);
+                $this->persistenceManager->persistAll();
+
+                $this->addFlashMessage(
+                    LocalizationUtility::translate(
+                        'tx_w4payrexx.controller.order.payment.action.failed.payment_failed',
+                        'w4_payrexx'
+                    )
+                );
+
+                $cancelEvent = new CancelEvent($this->cart->getCart(), $orderItem, $this->cartConf);
+                $this->eventDispatcher->dispatch($cancelEvent);
+                $this->redirect('show', 'Cart\Cart', 'Cart');
+            } else {
+                $this->addFlashMessage(
+                    LocalizationUtility::translate(
+                        'tx_w4payrexx.controller.order.payment.action.cancel.error_occured',
+                        'w4_payrexx'
+                    ),
+                    '',
+                    AbstractMessage::ERROR
+                );
+            }
+        } else {
+            $this->addFlashMessage(
+                LocalizationUtility::translate(
+                    'tx_w4payrexx.controller.order.payment.action.cancel.access_denied',
+                    'w4_payrexx'
+                ),
+                '',
+                AbstractMessage::ERROR
+            );
+        }
+    }
+
     public function cancelAction(): void
     {
         if ($this->request->hasArgument('hash') && !empty($this->request->getArgument('hash'))) {
