@@ -150,7 +150,8 @@ class Payrexx
         $gateway->setVatRate($orderItem->getTax()->toArray()[0]->getTaxClass()->getValue());
         $gateway->setReferenceId(self::REFERENCE_PREFIX . (string)$orderItem->getOrderNumber());
         $gateway->setSuccessRedirectUrl($this->getUrl('success', $this->cartSHash));
-        $gateway->setFailedRedirectUrl($this->getUrl('cancel', $this->cartFHash));
+        $gateway->setFailedRedirectUrl($this->getUrl('failed', $this->cartFHash));
+        $gateway->setCancelRedirectUrl($this->getUrl('cancel', $this->cartFHash));
  
         return $gateway;
     }
