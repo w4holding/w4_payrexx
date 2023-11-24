@@ -1,14 +1,14 @@
 <?php
 
 $EM_CONF[$_EXTKEY] = [
-    'title' => 'W4 Payrexx',
+    'title' => 'W4 Payrexx [forked]',
     'description' => 'W4 Payrexx payment gateway for TYPO3.',
     'version' => '1.0.1',
     'category' => 'fe',
     'constraints' => [
         'depends' => [
             'typo3' => '11.5.0-11.5.99',
-            'cart' => '8.2.0-8.2.99'
+            'cart' => '8.2.0-8.6.99'
         ],
     ],
     'state' => 'stable',

@@ -114,7 +114,6 @@ class PaymentController extends ActionController
 
                 $successEvent = new SuccessEvent($this->cart->getCart(), $orderItem, $this->cartConf);
                 $this->eventDispatcher->dispatch($successEvent);
-                
 
                 $this->redirect('show', 'Cart\Order', 'Cart', ['orderItem' => $orderItem]);
             } else {
@@ -214,7 +213,7 @@ class PaymentController extends ActionController
 
                 $cancelEvent = new CancelEvent($this->cart->getCart(), $orderItem, $this->cartConf);
                 $this->eventDispatcher->dispatch($cancelEvent);
-                $this->redirect('show', 'Cart\Cart', 'Cart');
+                $this->redirect('show', 'Cart\Cart', 'Cart', ['billingAddress' => $orderItem->getBillingAddress(), 'shippingAddress' => $orderItem->getShippingAddress()]);
             } else {
                 $this->addFlashMessage(
                     LocalizationUtility::translate(
