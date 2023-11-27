@@ -14,6 +14,7 @@ namespace W4Services\W4Payrexx\Controller\Order;
 use Extcode\Cart\Domain\Model\Cart;
 use Extcode\Cart\Domain\Repository\CartRepository;
 use Extcode\Cart\Domain\Repository\Order\PaymentRepository;
+use Extcode\Cart\Event\Order\FinishEvent;
 use Extcode\Cart\Service\SessionHandler;
 use W4Services\W4Payrexx\Event\Order\CancelEvent;
 use W4Services\W4Payrexx\Event\Order\NotifyEvent;
@@ -112,9 +113,8 @@ class PaymentController extends ActionController
             if ($this->cart) {
                 $orderItem = $this->cart->getOrderItem();
 
-                $successEvent = new SuccessEvent($this->cart->getCart(), $orderItem, $this->cartConf);
-                $this->eventDispatcher->dispatch($successEvent);
-
+                $finishEvent = new FinishEvent($this->cart->getCart(), $orderItem, $this->cartConf);
+                $this->eventDispatcher->dispatch($finishEvent);
                 $this->redirect('show', 'Cart\Order', 'Cart', ['orderItem' => $orderItem]);
             } else {
                 $this->addFlashMessage(
