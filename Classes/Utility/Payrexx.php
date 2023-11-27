@@ -14,6 +14,7 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 use W4Services\W4Payrexx\Models\Gateway;
 use TYPO3\CMS\Extbase\Mvc\Request;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 class Payrexx
 {
@@ -143,6 +144,7 @@ class Payrexx
         $gateway->addField('forename', $orderItem->getBillingAddress()->getFirstName());
         $gateway->addField('surname', $orderItem->getBillingAddress()->getLastName());
         $gateway->addField('email', $orderItem->getBillingAddress()->getEmail());
+        $gateway->addField('custom_field_1', (string)$orderItem->getOrderNumber(), LocalizationUtility::translate('tx_cart_domain_model_order_item.order_number', 'cart'));
         $gateway->setAmount($orderItem->getTotalGross() * 100);
         $gateway->setCurrency($this->getCurrency());
         $gateway->setVatRate($orderItem->getTax()->toArray()[0]->getTaxClass()->getValue());
