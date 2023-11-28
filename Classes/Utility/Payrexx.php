@@ -14,14 +14,13 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 use W4Services\W4Payrexx\Models\Gateway;
 use TYPO3\CMS\Extbase\Mvc\Request;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 class Payrexx
 {
     /**
-     *
+     * Prefix to referenceId in Gateway
      */
-    const API_URL = 'https://api.onlinezahlen.ch/v1.0/Gateway/?instance=';
-
     const REFERENCE_PREFIX = 'web_';
 
     /**
@@ -124,7 +123,7 @@ class Payrexx
         $formParams = $this->gateway->toArray();
         $formParams['ApiSignature'] = $apiSignature;
 
-        $response = $requestFactory->request(self::API_URL . $this->getApiInstance(), 'POST', ['form_params' => $formParams]);
+        $response = $requestFactory->request($this->getApiUrl() . $this->getApiInstance(), 'POST', ['form_params' => $formParams]);
 
         if ($response->getStatusCode() === 200) $content = $response->getBody()->getContents();
 
@@ -145,12 +144,14 @@ class Payrexx
         $gateway->addField('forename', $orderItem->getBillingAddress()->getFirstName());
         $gateway->addField('surname', $orderItem->getBillingAddress()->getLastName());
         $gateway->addField('email', $orderItem->getBillingAddress()->getEmail());
+        $gateway->addField('custom_field_1', (string)$orderItem->getOrderNumber(), LocalizationUtility::translate('tx_cart_domain_model_order_item.order_number', 'cart'));
         $gateway->setAmount($orderItem->getTotalGross() * 100);
         $gateway->setCurrency($this->getCurrency());
         $gateway->setVatRate($orderItem->getTax()->toArray()[0]->getTaxClass()->getValue());
         $gateway->setReferenceId(self::REFERENCE_PREFIX . (string)$orderItem->getOrderNumber());
         $gateway->setSuccessRedirectUrl($this->getUrl('success', $this->cartSHash));
-        $gateway->setFailedRedirectUrl($this->getUrl('cancel', $this->cartFHash));
+        $gateway->setFailedRedirectUrl($this->getUrl('failed', $this->cartFHash));
+        $gateway->setCancelRedirectUrl($this->getUrl('cancel', $this->cartFHash));
  
         return $gateway;
     }
@@ -188,6 +189,14 @@ class Payrexx
     private function createApiSignature(): string
     {
         return base64_encode(hash_hmac('sha256', http_build_query($this->gateway->toArray(), null, '&'), $this->getApiSecret(), true));
+    }
+
+    /**
+     * @return string
+     */
+    private function getApiUrl(): string
+    {
+        return $this->extensionConfiguration['payrexx_api_url'];
     }
 
     /**

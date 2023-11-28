@@ -14,6 +14,7 @@ namespace W4Services\W4Payrexx\Controller\Order;
 use Extcode\Cart\Domain\Model\Cart;
 use Extcode\Cart\Domain\Repository\CartRepository;
 use Extcode\Cart\Domain\Repository\Order\PaymentRepository;
+use Extcode\Cart\Event\Order\FinishEvent;
 use Extcode\Cart\Service\SessionHandler;
 use W4Services\W4Payrexx\Event\Order\CancelEvent;
 use W4Services\W4Payrexx\Event\Order\NotifyEvent;
@@ -21,6 +22,8 @@ use W4Services\W4Payrexx\Event\Order\SuccessEvent;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Log\LogManagerInterface;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
@@ -110,10 +113,8 @@ class PaymentController extends ActionController
             if ($this->cart) {
                 $orderItem = $this->cart->getOrderItem();
 
-                $successEvent = new SuccessEvent($this->cart->getCart(), $orderItem, $this->cartConf);
-                $this->eventDispatcher->dispatch($successEvent);
-                
-
+                $finishEvent = new FinishEvent($this->cart->getCart(), $orderItem, $this->cartConf);
+                $this->eventDispatcher->dispatch($finishEvent);
                 $this->redirect('show', 'Cart\Order', 'Cart', ['orderItem' => $orderItem]);
             } else {
                 $this->addFlashMessage(
@@ -129,6 +130,56 @@ class PaymentController extends ActionController
             $this->addFlashMessage(
                 LocalizationUtility::translate(
                     'tx_w4payrexx.controller.order.payment.action.success.access_denied',
+                    'w4_payrexx'
+                ),
+                '',
+                AbstractMessage::ERROR
+            );
+        }
+    }
+
+    public function failedAction(): void
+    {
+        if ($this->request->hasArgument('hash') && !empty($this->request->getArgument('hash'))) {
+            $this->loadCartByHash($this->request->getArgument('hash'), 'FHash');
+
+            if ($this->cart) {
+                $orderItem = $this->cart->getOrderItem();
+                $payment = $orderItem->getPayment();
+
+                $this->restoreCartSession();
+
+                $payment->setStatus('failed');
+
+                $this->paymentRepository->update($payment);
+                $this->persistenceManager->persistAll();
+
+                $this->addFlashMessageByQueueIdentifier('extbase.flashmessages.tx_cart_cart',
+                    LocalizationUtility::translate(
+                        'tx_w4payrexx.controller.order.payment.action.failed.payment_failed',
+                        'w4_payrexx'
+                    ),
+                    '',
+                    AbstractMessage::ERROR
+                );
+
+                $cancelEvent = new CancelEvent($this->cart->getCart(), $orderItem, $this->cartConf);
+                $this->eventDispatcher->dispatch($cancelEvent);
+                $this->redirect('show', 'Cart\Cart', 'Cart');
+            } else {
+                $this->addFlashMessage(
+                    LocalizationUtility::translate(
+                        'tx_w4payrexx.controller.order.payment.action.cancel.error_occured',
+                        'w4_payrexx'
+                    ),
+                    '',
+                    AbstractMessage::ERROR
+                );
+            }
+        } else {
+            $this->addFlashMessage(
+                LocalizationUtility::translate(
+                    'tx_w4payrexx.controller.order.payment.action.cancel.access_denied',
                     'w4_payrexx'
                 ),
                 '',
@@ -153,7 +204,7 @@ class PaymentController extends ActionController
                 $this->paymentRepository->update($payment);
                 $this->persistenceManager->persistAll();
 
-                $this->addFlashMessage(
+                $this->addFlashMessageByQueueIdentifier('extbase.flashmessages.tx_cart_cart',
                     LocalizationUtility::translate(
                         'tx_w4payrexx.controller.order.payment.action.cancel.successfully_canceled',
                         'w4_payrexx'
@@ -162,7 +213,7 @@ class PaymentController extends ActionController
 
                 $cancelEvent = new CancelEvent($this->cart->getCart(), $orderItem, $this->cartConf);
                 $this->eventDispatcher->dispatch($cancelEvent);
-                $this->redirect('show', 'Cart\Cart', 'Cart');
+                $this->redirect('show', 'Cart\Cart', 'Cart', ['billingAddress' => $orderItem->getBillingAddress(), 'shippingAddress' => $orderItem->getShippingAddress()]);
             } else {
                 $this->addFlashMessage(
                     LocalizationUtility::translate(
@@ -353,5 +404,21 @@ class PaymentController extends ActionController
 
         $findOneByMethod = 'findOneBy' . $type;
         $this->cart = $this->cartRepository->$findOneByMethod($hash);
+    }
+
+    protected function addFlashMessageByQueueIdentifier($identifier, string $messageBody, $messageTitle = '', $severity = AbstractMessage::OK, $storeInSession = true)
+    {
+         /* @var \TYPO3\CMS\Core\Messaging\FlashMessage $flashMessage */
+         $flashMessage = GeneralUtility::makeInstance(
+             FlashMessage::class,
+             $messageBody,
+             (string)$messageTitle,
+             $severity,
+             $storeInSession
+         );
+
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+        $messageQueue = $flashMessageService->getMessageQueueByIdentifier($identifier);
+        $messageQueue->addMessage($flashMessage);
     }
 }

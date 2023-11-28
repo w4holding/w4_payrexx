@@ -12,8 +12,11 @@
             <trans-unit id="w4_payrexx.controller.order.payment.action.success.access_denied">
                 <source>Access denied!</source>
             </trans-unit>
+            <trans-unit id="tx_w4payrexx.controller.order.payment.action.failed.payment_failed">
+                <source>Payment for this order has failed.</source>
+            </trans-unit>
             <trans-unit id="tx_w4payrexx.controller.order.payment.action.cancel.successfully_canceled">
-                <source>The order has been canceled.</source>
+                <source>Payment was canceled.</source>
             </trans-unit>
             <trans-unit id="tx_w4payrexx.controller.order.payment.action.cancel.error_occured">
                 <source>An error occurred while updating the order.</source>

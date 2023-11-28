@@ -23,7 +23,7 @@
     },
     "require": {
         "typo3/cms-core": "^11.5",
-        "extcode/cart": "^8.2"
+        "extcode/cart": "8.2.0 - 8.6.99"
     },
     "autoload": {
         "psr-4": {

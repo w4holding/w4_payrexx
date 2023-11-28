@@ -8,11 +8,11 @@ defined('TYPO3_MODE') or die();
         $_EXTKEY,
         'Cart',
         [
-            \W4Services\W4Payrexx\Controller\Order\PaymentController::class => 'success, cancel, notify',
+            \W4Services\W4Payrexx\Controller\Order\PaymentController::class => 'success, failed, cancel, notify',
         ],
         // non-cacheable actions
         [
-            \W4Services\W4Payrexx\Controller\Order\PaymentController::class => 'success, cancel, notify',
+            \W4Services\W4Payrexx\Controller\Order\PaymentController::class => 'success, failed, cancel, notify',
         ]
     );
 
